@@ -309,8 +309,8 @@
       <div class="preview-wrap"><canvas id="preview"></canvas></div>
       <div class="panel">
         <div class="row"><label>CALLSIGN</label><input type="text" id="nameInput" maxlength="12" value="Whiskers"></div>
-        <div class="row"><label>FUR</label><input type="color" id="furColor" value="#f0a03c"></div>
-        <div class="row"><label>BELLY / EARS</label><input type="color" id="accColor" value="#fff2dd"></div>
+        <div class="row"><label>FUR</label><input type="color" id="furColor" value="#9a9ba1"></div>
+        <div class="row"><label>BELLY / PAWS</label><input type="color" id="accColor" value="#f5ede0"></div>
         <div class="row"><label>EYES</label><input type="color" id="eyeColor" value="#3ee08a"></div>
         <div class="teams">
           <button data-team="blue" class="active">BLUE TEAM</button>
@@ -328,7 +328,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>
 /* ============================================================
-   CATSTRIKE — Pass 3 : smooth cats, real map, smart AI
+   CATSTRIKE — Pass 4 : plush cat model
    ============================================================ */
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 const rand =(a,b)=>a+Math.random()*(b-a);
@@ -484,18 +484,12 @@ const outerGround=new THREE.Mesh(new THREE.PlaneGeometry(400,400),
 outerGround.rotation.x=-Math.PI/2;outerGround.position.y=-0.02;world.add(outerGround);
 
 const WALL=0x9aa7b8,PLAT=0xc9b98d,PLAT2=0xb89b70,CRATE=0xb5793f,BUILD_A=0xe0cbb0,BUILD_B=0xbcd6e8;
-
-/* boundary walls */
 addBox(0,4,-31,64,8,2,WALL,wallTex);
 addBox(0,4, 31,64,8,2,WALL,wallTex);
 addBox(-31,4,0,2,8,64,WALL,wallTex);
 addBox( 31,4,0,2,8,64,WALL,wallTex);
-
-/* central two-tier hub */
 addBox(0,0.5,0,14,1,14,PLAT,stoneTex);
 addBox(0,1.25,0,8,0.5,8,PLAT2,stoneTex);
-
-/* staircases in 4 directions up to hub */
 function addStairs(cx,cz,dir){
   const stepH=0.4,stepDepth=1.1;
   for(let i=0;i<5;i++){
@@ -507,27 +501,18 @@ function addStairs(cx,cz,dir){
     else if(dir==='W') addBox(cx-off,h/2,cz,stepDepth,h,5,PLAT,stoneTex);
   }
 }
-addStairs(0,-9.5,'N');
-addStairs(0, 9.5,'S');
-addStairs(-9.5,0,'W');
-addStairs( 9.5,0,'E');
-
-/* corner buildings — U-shape with roof, open front */
+addStairs(0,-9.5,'N');addStairs(0, 9.5,'S');
+addStairs(-9.5,0,'W');addStairs( 9.5,0,'E');
 function addBuilding(px,pz,color){
-  addBox(px,1.75,pz-2.6,7,3.5,0.5,color);        // back wall
-  addBox(px-3.25,1.75,pz,0.5,3.5,5.2,color);     // left wall
-  addBox(px+3.25,1.75,pz,0.5,3.5,5.2,color);     // right wall
-  addBox(px,3.6,pz,7,0.3,5.7,color);             // roof
-  // Window holes (visual)
+  addBox(px,1.75,pz-2.6,7,3.5,0.5,color);
+  addBox(px-3.25,1.75,pz,0.5,3.5,5.2,color);
+  addBox(px+3.25,1.75,pz,0.5,3.5,5.2,color);
+  addBox(px,3.6,pz,7,0.3,5.7,color);
   addBox(px,2.3,pz-2.6,1.6,0.9,0.55,0x2a3340,false);
   addBox(px,1.0,pz-2.6,1.6,0.9,0.55,0x2a3340,false);
 }
-addBuilding(-20,-20,BUILD_A);
-addBuilding( 20,-20,BUILD_B);
-addBuilding(-20, 20,0xc9d9b8);
-addBuilding( 20, 20,0xe4bcc4);
-
-/* sniper perches */
+addBuilding(-20,-20,BUILD_A);addBuilding( 20,-20,BUILD_B);
+addBuilding(-20, 20,0xc9d9b8);addBuilding( 20, 20,0xe4bcc4);
 function addPerch(px,pz){
   addBox(px,0.5,pz,3,1,3,0x8b7355);
   addBox(px,1.35,pz,0.5,1.7,0.5,0x6b4a2f);
@@ -537,18 +522,10 @@ function addPerch(px,pz){
   addBox(px+1.25,2.55,pz,0.15,0.5,2.6,0x6b4a2f);
 }
 addPerch(-24,0);addPerch(24,0);addPerch(0,-24);addPerch(0,24);
-
-/* mid-lane low walls */
-addBox(-7,1.5,-14,3,3,1,0xc9bda6);
-addBox( 7,1.5,-14,3,3,1,0xc9bda6);
-addBox(-7,1.5, 14,3,3,1,0xc9bda6);
-addBox( 7,1.5, 14,3,3,1,0xc9bda6);
-addBox(-14,1.5,-7,1,3,3,0xc9bda6);
-addBox( 14,1.5,-7,1,3,3,0xc9bda6);
-addBox(-14,1.5, 7,1,3,3,0xc9bda6);
-addBox( 14,1.5, 7,1,3,3,0xc9bda6);
-
-/* scattered crates + stacked pairs */
+addBox(-7,1.5,-14,3,3,1,0xc9bda6);addBox( 7,1.5,-14,3,3,1,0xc9bda6);
+addBox(-7,1.5, 14,3,3,1,0xc9bda6);addBox( 7,1.5, 14,3,3,1,0xc9bda6);
+addBox(-14,1.5,-7,1,3,3,0xc9bda6);addBox( 14,1.5,-7,1,3,3,0xc9bda6);
+addBox(-14,1.5, 7,1,3,3,0xc9bda6);addBox( 14,1.5, 7,1,3,3,0xc9bda6);
 [[-5,1,5],[5,1,-5],[-5,1,-5],[5,1,5],
  [11,1,-11],[-11,1,11],[11,1,11],[-11,1,-11],
  [3,1,16],[-3,1,16],[3,1,-16],[-3,1,-16],
@@ -558,8 +535,6 @@ addBox(-5,3,-5,1.8,2,1.8,CRATE,crateTex);
 addBox(5,3,5,1.8,2,1.8,CRATE,crateTex);
 addBox(-5,3,5,1.8,2,1.8,CRATE,crateTex);
 addBox(5,3,-5,1.8,2,1.8,CRATE,crateTex);
-
-/* planters with bushes */
 function addPlanter(px,pz){
   addBox(px,0.4,pz,1.6,0.8,1.6,0x7a6a55);
   const bushMat=new THREE.MeshStandardMaterial({color:0x4e9c46,roughness:1,flatShading:true});
@@ -567,8 +542,6 @@ function addPlanter(px,pz){
   bush.position.set(px,1.15,pz);bush.castShadow=true;world.add(bush);
 }
 addPlanter(-11,11);addPlanter(11,-11);addPlanter(-11,-11);addPlanter(11,11);
-
-/* decorative trees outside arena */
 function addTree(x,z,s){
   const g=new THREE.Group();
   const trunk=new THREE.Mesh(new THREE.CylinderGeometry(0.22*s,0.28*s,1.6*s,7),
@@ -588,155 +561,190 @@ const SPAWNS={
   red :[[-4,0,-26],[4,0,-26],[-10,0,-24],[10,0,-24],[-14,0,-22],[14,0,-22]]
 };
 
-/* ============ CAT MODEL (smooth) ============ */
+/* ============ PLUSH CAT MODEL ============ */
 function buildCat(cfg){
   const g=new THREE.Group();
-  const furMat=new THREE.MeshStandardMaterial({color:cfg.fur,roughness:0.85});
-  const accMat=new THREE.MeshStandardMaterial({color:cfg.accent,roughness:0.85});
-  const eyeMat=new THREE.MeshStandardMaterial({color:cfg.eye,emissive:cfg.eye,
-    emissiveIntensity:0.9,roughness:0.2});
-  const darkMat=new THREE.MeshStandardMaterial({color:0x1a1a22,roughness:0.6});
-  const pinkMat=new THREE.MeshStandardMaterial({color:0xffb0bc,roughness:0.7});
+  const furMat=new THREE.MeshStandardMaterial({color:cfg.fur,roughness:0.9});
+  const accMat=new THREE.MeshStandardMaterial({color:cfg.accent,roughness:0.9});
+  const eyeDark=new THREE.MeshStandardMaterial({color:0x0a0a12,roughness:0.15,metalness:0.05});
+  const whiteMat=new THREE.MeshBasicMaterial({color:0xffffff});
+  const pinkMat=new THREE.MeshStandardMaterial({color:0xff8fa0,roughness:0.75});
+  const stripeCol=new THREE.Color(cfg.fur).multiplyScalar(0.52);
+  const stripeMat=new THREE.MeshStandardMaterial({color:stripeCol,roughness:0.9});
   const teamCol=cfg.team==='red'?0xff4757:0x3ea6ff;
   const teamMat=new THREE.MeshStandardMaterial({color:teamCol,emissive:teamCol,
-    emissiveIntensity:0.35,roughness:0.5});
+    emissiveIntensity:0.4,roughness:0.55});
 
-  /* BODY: stretched sphere */
-  const body=new THREE.Mesh(new THREE.SphereGeometry(0.5,20,14),furMat);
-  body.scale.set(0.85,0.95,0.68);
-  body.position.set(0,1.0,0);
+  const addStripe=(parent,x,y,z,sx,sy,sz,rot)=>{
+    const m=new THREE.Mesh(new THREE.SphereGeometry(1,12,8),stripeMat);
+    m.scale.set(sx,sy,sz);
+    m.position.set(x,y,z);
+    if(rot)m.rotation.set(rot[0]||0,rot[1]||0,rot[2]||0);
+    parent.add(m);
+  };
+
+  /* BODY — one big vertical oval (legs merged into torso) */
+  const body=new THREE.Mesh(new THREE.SphereGeometry(1,28,20),furMat);
+  body.scale.set(0.4,0.58,0.36);
+  body.position.set(0,0.6,0);
   body.castShadow=true;body.receiveShadow=true;
   g.add(body);
 
-  /* BELLY patch */
-  const belly=new THREE.Mesh(new THREE.SphereGeometry(0.3,14,10),accMat);
-  belly.scale.set(0.75,0.9,0.4);
-  belly.position.set(0,0.94,0.22);
+  /* belly cream oval */
+  const belly=new THREE.Mesh(new THREE.SphereGeometry(1,20,14),accMat);
+  belly.scale.set(0.28,0.5,0.24);
+  belly.position.set(0,0.58,0.17);
   g.add(belly);
 
-  /* TEAM VEST (partial sphere cap on torso) */
-  const vest=new THREE.Mesh(new THREE.SphereGeometry(0.47,18,10,0,Math.PI*2,Math.PI*0.35,Math.PI*0.55),teamMat);
-  vest.scale.set(0.92,0.8,0.74);
-  vest.position.set(0,1.13,0);
-  g.add(vest);
-  const badge=new THREE.Mesh(new THREE.SphereGeometry(0.07,10,8),teamMat);
-  badge.position.set(0,1.18,0.44);
-  g.add(badge);
+  /* bottom cream foot patches */
+  [-0.15,0.15].forEach(x=>{
+    const foot=new THREE.Mesh(new THREE.SphereGeometry(1,14,10),accMat);
+    foot.scale.set(0.12,0.06,0.15);
+    foot.position.set(x,0.06,0.1);
+    g.add(foot);
+  });
 
-  /* HEAD group */
+  /* body stripes */
+  addStripe(g,-0.38,0.9,0, 0.035,0.08,0.13, [0,0,-0.3]);
+  addStripe(g, 0.38,0.9,0, 0.035,0.08,0.13, [0,0,0.3]);
+  addStripe(g,-0.4,0.65,0, 0.035,0.07,0.12, [0,0,-0.2]);
+  addStripe(g, 0.4,0.65,0, 0.035,0.07,0.12, [0,0,0.2]);
+  addStripe(g,-0.36,0.4,0, 0.035,0.06,0.1, [0,0,-0.15]);
+  addStripe(g, 0.36,0.4,0, 0.035,0.06,0.1, [0,0,0.15]);
+
+  /* team band around waist */
+  const band=new THREE.Mesh(new THREE.TorusGeometry(0.3,0.045,10,24),teamMat);
+  band.rotation.x=Math.PI/2;
+  band.position.set(0,0.98,0);
+  band.scale.set(1,0.88,1);
+  g.add(band);
+
+  /* HEAD */
   const head=new THREE.Group();
-  head.position.set(0,1.72,0.04);
+  head.position.set(0,1.42,0);
   g.add(head);
 
-  const skull=new THREE.Mesh(new THREE.SphereGeometry(0.4,20,14),furMat);
-  skull.scale.set(1.0,0.9,1.08);
+  const skull=new THREE.Mesh(new THREE.SphereGeometry(1,28,22),furMat);
+  skull.scale.set(0.46,0.44,0.44);
   skull.castShadow=true;
   head.add(skull);
 
-  /* muzzle */
-  const muzzle=new THREE.Mesh(new THREE.SphereGeometry(0.21,14,10),accMat);
-  muzzle.scale.set(1.05,0.72,0.9);
-  muzzle.position.set(0,-0.09,0.3);
+  /* muzzle cream patch */
+  const muzzle=new THREE.Mesh(new THREE.SphereGeometry(1,20,14),accMat);
+  muzzle.scale.set(0.26,0.15,0.13);
+  muzzle.position.set(0,-0.13,0.33);
   head.add(muzzle);
 
-  /* nose */
-  const nose=new THREE.Mesh(new THREE.SphereGeometry(0.055,10,8),pinkMat);
-  nose.position.set(0,-0.01,0.47);
-  head.add(nose);
+  /* head stripes — top of head */
+  addStripe(head,-0.12,0.33,-0.13, 0.035,0.025,0.09, [0,0,0.35]);
+  addStripe(head, 0,   0.36,-0.17, 0.035,0.025,0.11, [0,0,0]);
+  addStripe(head, 0.12,0.33,-0.13, 0.035,0.025,0.09, [0,0,-0.35]);
+  /* side cheek stripes */
+  addStripe(head,-0.36,0.12,0.1,  0.025,0.05,0.08, [0,0,-0.4]);
+  addStripe(head, 0.36,0.12,0.1,  0.025,0.05,0.08, [0,0,0.4]);
 
-  /* mouth line */
-  const mouth=new THREE.Mesh(new THREE.BoxGeometry(0.02,0.005,0.09),darkMat);
-  mouth.position.set(0,-0.13,0.4);
-  head.add(mouth);
-
-  /* eyes with pupils */
+  /* big eyes with white highlights */
   [-0.17,0.17].forEach(x=>{
-    const eye=new THREE.Mesh(new THREE.SphereGeometry(0.11,16,12),eyeMat);
-    eye.position.set(x,0.08,0.28);
+    const eye=new THREE.Mesh(new THREE.SphereGeometry(0.095,20,16),eyeDark);
+    eye.scale.set(0.9,1.15,0.7);
+    eye.position.set(x,0.06,0.36);
     head.add(eye);
-    const pupil=new THREE.Mesh(new THREE.SphereGeometry(0.04,8,10),darkMat);
-    pupil.scale.set(0.55,1.4,0.55);
-    pupil.position.set(x,0.08,0.38);
-    head.add(pupil);
+    const hl=new THREE.Mesh(new THREE.SphereGeometry(0.032,12,10),whiteMat);
+    hl.position.set(x-Math.sign(x)*0.025,0.095,0.415);
+    head.add(hl);
+    const hl2=new THREE.Mesh(new THREE.SphereGeometry(0.014,10,8),whiteMat);
+    hl2.position.set(x,0.005,0.43);
+    head.add(hl2);
   });
 
-  /* ears — rounded cones */
-  [-0.22,0.22].forEach((x,i)=>{
-    const ear=new THREE.Group();
-    ear.position.set(x,0.36,-0.02);
-    ear.rotation.z=i?-0.28:0.28;
-    const outer=new THREE.Mesh(new THREE.ConeGeometry(0.16,0.32,10),furMat);
-    outer.castShadow=true;
-    ear.add(outer);
-    const inner=new THREE.Mesh(new THREE.ConeGeometry(0.1,0.2,10),pinkMat);
-    inner.position.set(0,0.01,0.04);
-    ear.add(inner);
-    head.add(ear);
+  /* pink nose */
+  const nose=new THREE.Mesh(new THREE.SphereGeometry(0.04,12,10),pinkMat);
+  nose.scale.set(1,0.7,0.7);
+  nose.position.set(0,-0.08,0.45);
+  head.add(nose);
+
+  /* cat mouth (vertical + two angled lines) */
+  const vline=new THREE.Mesh(new THREE.BoxGeometry(0.008,0.028,0.008),eyeDark);
+  vline.position.set(0,-0.115,0.44);
+  head.add(vline);
+  [-1,1].forEach(s=>{
+    const line=new THREE.Mesh(new THREE.BoxGeometry(0.05,0.008,0.008),eyeDark);
+    line.position.set(s*0.028,-0.135,0.44);
+    line.rotation.z=s*0.6;
+    head.add(line);
   });
 
   /* whiskers */
   [-1,1].forEach(s=>{
     for(let i=-1;i<=1;i++){
-      const w=new THREE.Mesh(new THREE.CylinderGeometry(0.006,0.002,0.3,3),accMat);
-      w.position.set(s*0.26,-0.05+i*0.045,0.38);
-      w.rotation.z=Math.PI/2*s*0.92;
-      w.rotation.y=-s*(i*0.14+0.32);
+      const w=new THREE.Mesh(new THREE.CylinderGeometry(0.004,0.002,0.25,4),accMat);
+      w.position.set(s*0.27,-0.06+i*0.045,0.33);
+      w.rotation.z=Math.PI/2*s;
+      w.rotation.y=-s*(i*0.12+0.3);
       head.add(w);
     }
   });
 
-  /* TAIL — curved tube */
+  /* rounded ears with pink inner */
+  [-0.22,0.22].forEach((x,i)=>{
+    const ear=new THREE.Group();
+    ear.position.set(x,0.36,-0.02);
+    ear.rotation.z=i?-0.22:0.22;
+    const outer=new THREE.Mesh(new THREE.ConeGeometry(0.13,0.28,12),furMat);
+    outer.castShadow=true;
+    ear.add(outer);
+    const inner=new THREE.Mesh(new THREE.ConeGeometry(0.08,0.18,12),pinkMat);
+    inner.position.set(0,0.005,0.05);
+    ear.add(inner);
+    addStripe(ear,0,0.06,0, 0.08,0.03,0.08, [0,0,0]);
+    head.add(ear);
+  });
+
+  /* curved tube tail with cream tip + stripes */
   const tailGroup=new THREE.Group();
-  tailGroup.position.set(0,0.85,-0.35);
+  tailGroup.position.set(0,0.68,-0.3);
   const tailPts=[];
-  for(let i=0;i<=10;i++){
-    const t=i/10;
+  for(let i=0;i<=8;i++){
+    const t=i/8;
     tailPts.push(new THREE.Vector3(
-      Math.sin(t*Math.PI*0.7)*0.35,
-      0.05+t*1.15,
-      -t*0.75
+      Math.sin(t*Math.PI*0.5)*0.1,
+      t*0.55,
+      -t*0.35
     ));
   }
   const tailCurve=new THREE.CatmullRomCurve3(tailPts);
-  const tailGeo=new THREE.TubeGeometry(tailCurve,20,0.075,8,false);
+  const tailGeo=new THREE.TubeGeometry(tailCurve,16,0.09,8,false);
   const tail=new THREE.Mesh(tailGeo,furMat);
   tail.castShadow=true;
   tailGroup.add(tail);
-  const tip=new THREE.Mesh(new THREE.SphereGeometry(0.08,10,8),accMat);
-  tip.position.set(0.35,1.2,-0.75);
+  const tip=new THREE.Mesh(new THREE.SphereGeometry(0.1,12,10),accMat);
+  tip.position.set(0.1,0.55,-0.35);
   tailGroup.add(tip);
+  addStripe(tailGroup,0.03,0.18,-0.11, 0.09,0.03,0.09, [0,0,0.3]);
+  addStripe(tailGroup,0.06,0.33,-0.21, 0.09,0.03,0.09, [0,0,0.3]);
   g.add(tailGroup);
 
-  /* LEGS — pivot at hip, cylinders + sphere paws */
-  const legs=[];
-  [-0.22,0.22].forEach(x=>{
-    const lg=new THREE.Group();
-    lg.position.set(x,0.52,0);
-    const upper=new THREE.Mesh(new THREE.CylinderGeometry(0.15,0.12,0.38,10),furMat);
-    upper.position.set(0,-0.19,0);upper.castShadow=true;lg.add(upper);
-    const lower=new THREE.Mesh(new THREE.CylinderGeometry(0.11,0.1,0.25,10),furMat);
-    lower.position.set(0,-0.44,0);lower.castShadow=true;lg.add(lower);
-    const paw=new THREE.Mesh(new THREE.SphereGeometry(0.14,12,8),accMat);
-    paw.scale.set(1,0.65,1.35);
-    paw.position.set(0,-0.56,0.07);paw.castShadow=true;lg.add(paw);
-    g.add(lg);legs.push(lg);
-  });
-
-  /* ARMS — pivot at shoulder */
+  /* stubby arms with cream paws */
   const arms=[];
-  [-0.5,0.5].forEach(x=>{
+  [-1,1].forEach(s=>{
     const arm=new THREE.Group();
-    arm.position.set(x,1.4,0.06);
-    const upper=new THREE.Mesh(new THREE.CylinderGeometry(0.11,0.095,0.34,10),furMat);
-    upper.position.set(0,-0.17,0);upper.castShadow=true;arm.add(upper);
-    const fore=new THREE.Mesh(new THREE.CylinderGeometry(0.095,0.08,0.26,10),furMat);
-    fore.position.set(0,-0.44,0.02);fore.castShadow=true;arm.add(fore);
-    const paw=new THREE.Mesh(new THREE.SphereGeometry(0.115,12,10),accMat);
-    paw.position.set(0,-0.6,0.06);paw.castShadow=true;arm.add(paw);
-    g.add(arm);arms.push(arm);
+    arm.position.set(s*0.38,0.95,0.05);
+    arm.rotation.z=s*0.1;
+    const upper=new THREE.Mesh(new THREE.CylinderGeometry(0.095,0.085,0.3,14),furMat);
+    upper.position.set(0,-0.15,0);
+    upper.castShadow=true;
+    arm.add(upper);
+    const paw=new THREE.Mesh(new THREE.SphereGeometry(0.11,16,12),accMat);
+    paw.position.set(0,-0.32,0.01);
+    paw.castShadow=true;
+    arm.add(paw);
+    addStripe(arm, s*0.085,-0.08,0, 0.025,0.035,0.07, [0,0,s*0.5]);
+    addStripe(arm, s*0.09,-0.18,0, 0.025,0.035,0.07, [0,0,s*0.5]);
+    g.add(arm);
+    arms.push(arm);
   });
 
-  g.userData={legs,arms,tail:tailGroup,head};
+  g.userData={arms, tail:tailGroup, head};
   return g;
 }
 
@@ -785,15 +793,13 @@ const WEAPONS={
            recoilPitch:0.045, recoilYaw:0.006, kickVM:3.6,zoom:3.4, botRange:30,switchIn:0.42,switchOut:0.26}
 };
 
-/* ============ CONSTANTS ============ */
 const GRAVITY=-26;
 const PLAYER_SPEED=8.4, SPRINT_MULT=1.32, JUMP_VEL=8.6;
 const EYE_HEIGHT=1.68, EYE_CROUCH=1.08, CHAR_RADIUS=0.48, CHAR_HEIGHT=1.95;
 const STEP_HEIGHT=0.55;
 
-/* ============ STATE ============ */
 const state={running:false,over:false,blueScore:0,redScore:0,timeLeft:360,
-  team:'blue',name:'Whiskers',custom:{fur:'#f0a03c',accent:'#fff2dd',eye:'#3ee08a'}};
+  team:'blue',name:'Whiskers',custom:{fur:'#9a9ba1',accent:'#f5ede0',eye:'#3ee08a'}};
 
 const player={
   id:0,isPlayer:true,name:'',team:'blue',
@@ -812,11 +818,9 @@ const bots=[];const chars=[player];let nextId=1;
 const NAMES=['Mochi','Biscuit','Pixel','Bandit','Sushi','Noodle','Gizmo','Pepper',
              'Waffles','Tofu','Jasper','Clover','Nugget','Pumpkin'];
 
-/* ============ PHYSICS (with auto-step) ============ */
 function moveWithCollisions(pos,vel,radius,height,dt){
   pos.x+=vel.x*dt;pos.z+=vel.z*dt;
   let onGround=false,groundTag='grass';
-
   for(let i=0;i<colliders.length;i++){
     const b=colliders[i];
     if(pos.y+height<=b.min.y+0.06)continue;
@@ -826,10 +830,8 @@ function moveWithCollisions(pos,vel,radius,height,dt){
     let dx=pos.x-cx,dz=pos.z-cz;
     const d2=dx*dx+dz*dz;
     if(d2<radius*radius){
-      /* try auto-step */
       const stepUp=b.max.y-pos.y;
       if(stepUp>0 && stepUp<=STEP_HEIGHT){
-        /* check head clearance at new position */
         let clear=true;
         const nY=b.max.y;
         for(let j=0;j<colliders.length;j++){
@@ -841,11 +843,7 @@ function moveWithCollisions(pos,vel,radius,height,dt){
           if(ddx*ddx+ddz*ddz>=radius*radius)continue;
           if(nY+height>b2.min.y && nY<b2.max.y){clear=false;break;}
         }
-        if(clear){
-          pos.y=nY;
-          onGround=true;groundTag='stone';
-          continue;
-        }
+        if(clear){pos.y=nY;onGround=true;groundTag='stone';continue;}
       }
       const d=Math.sqrt(d2);
       if(d<1e-4){
@@ -860,7 +858,6 @@ function moveWithCollisions(pos,vel,radius,height,dt){
       }
     }
   }
-
   const prevY=pos.y;
   vel.y+=GRAVITY*dt;
   pos.y+=vel.y*dt;
@@ -878,7 +875,6 @@ function moveWithCollisions(pos,vel,radius,height,dt){
   return {onGround,tag:groundTag};
 }
 
-/* ============ RAYS ============ */
 function rayAABBN(ox,oy,oz,dx,dy,dz,b){
   let tmin=0,tmax=Infinity,axis=0,sign=1;
   if(Math.abs(dx)<1e-8){if(ox<b.min.x||ox>b.max.x)return null;}
@@ -932,7 +928,6 @@ function hasLOS(ax,ay,az,bx,by,bz){
   return !r.hit||r.dist>=len-0.25;
 }
 
-/* ============ EFFECTS ============ */
 const decalGeo=new THREE.PlaneGeometry(0.15,0.15);
 const IMPACT_GEO=new THREE.SphereGeometry(0.045,5,5);
 function spawnTracer(a,b,color){
@@ -1012,7 +1007,6 @@ function updateDamageNumbers(dt){
   }
 }
 
-/* ============ HUD ============ */
 const hud=$('hud'),crosshair=$('crosshair'),hitmarker=$('hitmarker');
 const healthBar=$('healthBar'),healthNum=$('healthNum');
 const ammoNums=$('ammoNums'),weaponName=$('weaponName'),reloadHint=$('reloadHint');
@@ -1139,7 +1133,6 @@ function updateMarkers(){
   }
 }
 
-/* ============ COMBAT ============ */
 function damageChar(target,amount,attacker,isHead){
   if(!target.alive||target.spawnProtect>0)return;
   target.health-=amount;
@@ -1158,7 +1151,6 @@ function damageChar(target,amount,attacker,isHead){
     target.lastAttacker=attacker;
     target.retargetTimer=0;
     target.reactionDelay=Math.min(target.reactionDelay||0.5,0.22);
-    /* if hit from behind, spin around */
     if(target.isPlayer===false){
       const dx=attacker.pos.x-target.pos.x,dz=attacker.pos.z-target.pos.z;
       const toAttacker=Math.atan2(dx,dz);
@@ -1236,18 +1228,12 @@ function playerShoot(){
   player.camRecoilYaw+=rand(-1,1)*w.recoilYaw;
   sfxShot(player.weapon,0.22);
   muzzleFlash();
-
-  /* hearing: alert nearby bots */
   for(const b of bots){
     if(!b.alive||b.team===player.team)continue;
     const dx=b.pos.x-player.pos.x,dz=b.pos.z-player.pos.z;
     const d=Math.sqrt(dx*dx+dz*dz);
-    if(d<32){
-      b.alertTimer=3.0;
-      b.alertPos={x:player.pos.x,z:player.pos.z};
-    }
+    if(d<32){b.alertTimer=3.0;b.alertPos={x:player.pos.x,z:player.pos.z};}
   }
-
   _origin.set(player.pos.x,player.pos.y+player.eyeHeight,player.pos.z);
   const hitsByTarget=new Map();
   for(let p=0;p<w.pellets;p++){
@@ -1301,7 +1287,6 @@ function switchWeapon(name){
   player.reloading=0;sfxSwitch();
 }
 
-/* ============ BOT AI (Pass 3) ============ */
 const PERSONALITIES={
   rusher :{preferred:6,  aggressive:true,  retreatHP:15, turnSpeed:8, weapon:'shotgun'},
   soldier:{preferred:12, aggressive:false, retreatHP:35, turnSpeed:6, weapon:'pistol'},
@@ -1311,6 +1296,7 @@ const PERSONALITIES={
 function makeBot(team,name,cfg,personalityName){
   const p=PERSONALITIES[personalityName||pick(['rusher','soldier','sniper','scout'])];
   const mesh=buildCat({fur:cfg.fur,accent:cfg.accent,eye:cfg.eye,team});
+  mesh.rotation.order='YXZ';
   const weaponMount=new THREE.Group();
   weaponMount.position.set(0.34,1.28,0.34);
   mesh.add(weaponMount);
@@ -1348,8 +1334,6 @@ function updateBot(bot,dt){
     bot.reloading-=dt;
     if(bot.reloading<=0)bot.ammo=WEAPONS[bot.weapon].mag;
   }
-
-  /* target selection */
   bot.retargetTimer-=dt;
   if(bot.retargetTimer<=0||!bot.target||!bot.target.alive){
     bot.retargetTimer=0.35;
@@ -1358,7 +1342,6 @@ function updateBot(bot,dt){
       if(!c.alive||c.team===bot.team||c.spawnProtect>0)continue;
       const dx=c.pos.x-bot.pos.x,dz=c.pos.z-bot.pos.z;
       const d=dx*dx+dz*dz;
-      /* FOV check (~120 deg) */
       const dist=Math.sqrt(d);
       const forwardX=Math.sin(bot.yaw),forwardZ=Math.cos(bot.yaw);
       const dot=(forwardX*dx+forwardZ*dz)/(dist||1);
@@ -1366,37 +1349,28 @@ function updateBot(bot,dt){
       const hasLOSC = hasLOS(bot.pos.x,bot.pos.y+1.4,bot.pos.z,c.pos.x,c.pos.y+1.2,c.pos.z);
       if(inFov && hasLOSC && d<bestD){bestD=d;best=c;}
     }
-    /* if none seen, use shared target (callout from teammate) */
     if(!best && bot.sharedTarget && bot.sharedTarget.alive && bot.sharedTargetTime>0){
       best=bot.sharedTarget;
-    }
-    /* if none seen, use hearing position */
-    if(!best && bot.alertTimer>0 && bot.alertPos){
-      /* move toward alert pos, don't shoot */
     }
     if(best!==bot.target){
       bot.target=best;bot.aimTime=0;
       bot.reactionDelay=rand(0.28,0.7);
-      /* team callout: share with nearby allies */
       if(best){
         for(const other of bots){
           if(other===bot||other.team!==bot.team||!other.alive)continue;
           if(other.pos.distanceTo(bot.pos)<22){
-            other.sharedTarget=best;
-            other.sharedTargetTime=3.0;
+            other.sharedTarget=best;other.sharedTargetTime=3.0;
           }
         }
       }
     }
   }
-
   const w=WEAPONS[bot.weapon];
   const p=bot.personality;
   let moveX=0,moveZ=0,aiming=false;
   let desiredRange=p.preferred;
   bot.retreating=false;
   if(bot.health<p.retreatHP) {desiredRange*=2.2;bot.retreating=true;}
-
   if(bot.target&&bot.target.alive){
     const t=bot.target;
     const dx=t.pos.x-bot.pos.x,dz=t.pos.z-bot.pos.z;
@@ -1408,7 +1382,6 @@ function updateBot(bot,dt){
     const ts=p.turnSpeed;
     bot.yaw+=clamp(diff,-ts*dt,ts*dt);
     aiming=Math.abs(diff)<0.22;
-
     if(dist>desiredRange+3){moveX=dx/dist;moveZ=dz/dist;}
     else if(dist<desiredRange-3){moveX=-dx/dist;moveZ=-dz/dist;}
     else{
@@ -1419,7 +1392,6 @@ function updateBot(bot,dt){
     const eyeY=bot.pos.y+1.5,tEyeY=t.pos.y+1.15;
     const los=hasLOS(bot.pos.x,eyeY,bot.pos.z,t.pos.x,tEyeY,t.pos.z);
     if(los&&aiming)bot.aimTime+=dt;else bot.aimTime=0;
-
     if(los&&aiming&&bot.aimTime>bot.reactionDelay&&bot.fireCd<=0
        &&bot.reloading<=0&&bot.ammo>0&&dist<w.range){
       bot.ammo--;
@@ -1441,7 +1413,6 @@ function updateBot(bot,dt){
       }
     }
   }else{
-    /* patrol / move toward alert */
     let tx,tz;
     if(bot.alertTimer>0&&bot.alertPos){tx=bot.alertPos.x;tz=bot.alertPos.z;}
     else if(bot.lastAttacker&&bot.lastAttacker.alive){tx=bot.lastAttacker.pos.x;tz=bot.lastAttacker.pos.z;}
@@ -1465,7 +1436,6 @@ function updateBot(bot,dt){
   bot.vel.x=moveX*speed;bot.vel.z=moveZ*speed;
   const g=moveWithCollisions(bot.pos,bot.vel,CHAR_RADIUS,CHAR_HEIGHT,dt);
   bot.onGround=g.onGround;
-
   const moved=Math.hypot(bot.pos.x-prevX,bot.pos.z-prevZ);
   const wanted=speed*dt;
   if(wanted>0.01&&moved<wanted*0.35){
@@ -1482,20 +1452,20 @@ function updateBot(bot,dt){
   bot.mesh.position.copy(bot.pos);
   bot.mesh.rotation.y=bot.yaw;
 
+  /* animation — legs are gone, so we swing arms and roll the body */
   const spd=Math.hypot(bot.vel.x,bot.vel.z);
   bot.walkPhase+=dt*spd*2.2;
-  const swing=Math.sin(bot.walkPhase)*0.55*Math.min(spd/6,1);
-  bot.mesh.userData.legs[0].rotation.x=swing;
-  bot.mesh.userData.legs[1].rotation.x=-swing;
   bot.mesh.userData.tail.rotation.y=Math.sin(performance.now()*0.002)*0.3;
   bot.mesh.userData.tail.rotation.x=Math.sin(performance.now()*0.0015)*0.12;
   const armTarget=aiming?-1.15:-0.35;
-  bot.mesh.userData.arms.forEach((a,i)=>{
-    a.rotation.x=lerp(a.rotation.x,armTarget+(i?0.06:-0.06),dt*8);
-  });
+  const walkSwing=0.4*Math.sin(bot.walkPhase)*Math.min(spd/6,1)*(aiming?0.25:1);
+  bot.mesh.userData.arms[0].rotation.x=lerp(bot.mesh.userData.arms[0].rotation.x,
+    armTarget+walkSwing, dt*8);
+  bot.mesh.userData.arms[1].rotation.x=lerp(bot.mesh.userData.arms[1].rotation.x,
+    armTarget-walkSwing, dt*8);
+  bot.mesh.rotation.z=Math.sin(bot.walkPhase)*0.05*Math.min(spd/6,1);
 }
 
-/* ============ VIEWMODEL ============ */
 const viewModels={};
 const viewModelRoot=new THREE.Group();
 camera.add(viewModelRoot);
@@ -1504,7 +1474,7 @@ viewModelRoot.position.set(0.28,-0.30,-0.55);
   const m=buildWeapon(t);m.scale.setScalar(1.05);m.rotation.y=0.06;
   m.visible=(t===player.weapon);viewModelRoot.add(m);viewModels[t]=m;
 });
-const pawMat=new THREE.MeshStandardMaterial({color:0xf0a03c,roughness:0.9});
+const pawMat=new THREE.MeshStandardMaterial({color:0xf5ede0,roughness:0.9});
 const pawL=new THREE.Mesh(new THREE.SphereGeometry(0.09,10,8),pawMat);
 pawL.position.set(-0.05,-0.13,0.02);viewModelRoot.add(pawL);
 const pawR=new THREE.Mesh(new THREE.SphereGeometry(0.09,10,8),pawMat);
@@ -1515,7 +1485,6 @@ const flashMesh=new THREE.Mesh(new THREE.SphereGeometry(0.11,8,8),flashMat);
 flashMesh.position.set(0,0.02,-0.75);viewModelRoot.add(flashMesh);
 let flashTimer=0;
 
-/* ============ INPUT ============ */
 const keys={};
 let mouseDown=false,pointerLocked=false;
 addEventListener('keydown',e=>{
@@ -1575,7 +1544,6 @@ $('setVol').addEventListener('input',e=>{
   settings.volume=parseFloat(e.target.value);$('setVolVal').textContent=Math.round(settings.volume*100)+'%';
 });
 
-/* ============ PLAYER UPDATE ============ */
 function updatePlayer(dt){
   if(player.spawnProtect>0)player.spawnProtect-=dt;
   if(!player.alive){
@@ -1610,7 +1578,6 @@ function updatePlayer(dt){
   player.crouching=!!(keys['ControlLeft']||keys['ControlRight']);
   const eyeTarget=player.crouching?EYE_CROUCH:EYE_HEIGHT;
   player.eyeHeight=lerp(player.eyeHeight,eyeTarget,dt*12);
-
   let fx=0,fz=0;
   const fwd=new THREE.Vector3(-Math.sin(player.yaw),0,-Math.cos(player.yaw));
   const right=new THREE.Vector3(Math.cos(player.yaw),0,-Math.sin(player.yaw));
@@ -1709,7 +1676,6 @@ function updatePlayer(dt){
   updateCrosshair(dt);
 }
 
-/* ============ FLOW ============ */
 function startMatch(){
   for(const b of bots)scene.remove(b.mesh);
   bots.length=0;chars.length=0;chars.push(player);
@@ -1728,19 +1694,19 @@ function startMatch(){
   for(const k in viewModels)viewModels[k].visible=(k==='pistol');
   const enemyTeam=state.team==='blue'?'red':'blue';
   const pool=NAMES.slice().sort(()=>Math.random()-0.5);
-  const furPool=['#f0a03c','#8a8f99','#e8e4dc','#4a4a58','#c96b3a','#d9c7a3',
-                 '#7a5c48','#f2d0a4','#3b3f4a','#b0a8c0'];
+  const furPool=['#9a9ba1','#7a7d84','#c8a687','#6b5847','#d4c5a9','#f0a03c',
+                 '#8b7355','#b8b0a0','#4a4a58','#e8dcc4'];
   const persPool=['soldier','scout','rusher'];
   for(let i=0;i<3;i++){
     const b=makeBot(state.team,pool[i],
-      {fur:furPool[(i*2)%furPool.length],accent:'#fff2dd',
+      {fur:furPool[(i*2)%furPool.length],accent:'#f5ede0',
        eye:pick(['#3ee08a','#ffd93d','#4db4ff'])},persPool[i]);
     bots.push(b);chars.push(b);
   }
   const enemyPers=['rusher','soldier','sniper','scout'];
   for(let i=0;i<4;i++){
     const b=makeBot(enemyTeam,pool[3+i],
-      {fur:furPool[(i*3+1)%furPool.length],accent:'#ffe9d6',
+      {fur:furPool[(i*3+1)%furPool.length],accent:'#f5ede0',
        eye:pick(['#ff6b6b','#ffd93d','#b28dff'])},enemyPers[i]);
     bots.push(b);chars.push(b);
   }
@@ -1818,7 +1784,7 @@ function animate(){
 animate();
 document.addEventListener('visibilitychange',()=>{lastTime=performance.now();});
 
-/* ============ MENU PREVIEW ============ */
+/* menu preview */
 const previewCanvas=$('preview');
 const pRenderer=new THREE.WebGLRenderer({canvas:previewCanvas,antialias:true,alpha:true});
 pRenderer.setPixelRatio(Math.min(devicePixelRatio,2));
@@ -1880,7 +1846,7 @@ $('playBtn').addEventListener('click',()=>{
   state.custom.fur=uiFur.value;
   state.custom.accent=uiAcc.value;
   state.custom.eye=uiEye.value;
-  pawMat.color.set(state.custom.fur);
+  pawMat.color.set(state.custom.accent);
   $('menu').classList.add('hide');
   startMatch();
   canvas.requestPointerLock();
