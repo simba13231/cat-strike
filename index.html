@@ -1874,7 +1874,7 @@ function killChar(target,attacker,isHead){
       killerText.textContent='';
       showDeathScreen();
     }
-  }else target.respawn=2.0+Math.random()*1.5;
+  }else{target.respawn=2.0+Math.random()*1.5;target.deaths++;}
   if(attacker&&attacker.team!==target.team){
     if(attacker.team==='blue')state.blueScore++;else state.redScore++;
     if(attacker===player){
@@ -1890,6 +1890,8 @@ function killChar(target,attacker,isHead){
       if(n===2)announce('DOUBLE KILL');
       else if(n===3)announce('TRIPLE KILL');
       else if(n>=4)announce('MEGA KILL');
+    }else{
+      attacker.kills++;
     }
   }else{
     if(target.team==='blue')state.redScore++;else state.blueScore++;
