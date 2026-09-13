@@ -1851,6 +1851,9 @@ function damageChar(target,amount,attacker,isHead){
       while(diff>Math.PI)diff-=Math.PI*2;
       while(diff<-Math.PI)diff+=Math.PI*2;
       if(Math.abs(diff)>0.9)target.yaw+=clamp(diff,-6,6);
+      /* dodge: getting shot triggers an evasive lateral juke, not a slowdown */
+      target.dodgeTimer=0.4+Math.random()*0.25;
+      target.strafeDir=Math.random()<0.5?1:-1;
     }
   }
   if(target.health<=0)killChar(target,attacker,isHead);
@@ -2039,7 +2042,7 @@ function makeBot(team,name,cfg,personalityName){
     sharedTarget:null,sharedTargetTime:0,retreating:false,
     blinkTimer:rand(2.5,5.5),blinkPhase:0,
     twitchTimer:rand(3,8),twitchPhase:0,
-    flinchTime:0
+    flinchTime:0,dodgeTimer:0
   };
   bot.wpnMesh=buildWeapon(bot.weapon);weaponMount.add(bot.wpnMesh);
   return bot;
@@ -2049,6 +2052,7 @@ function updateBot(bot,dt){
   if(bot.alertTimer>0)bot.alertTimer-=dt;
   if(bot.sharedTargetTime>0)bot.sharedTargetTime-=dt;
   if(bot.flinchTime>0)bot.flinchTime-=dt;
+  if(bot.dodgeTimer>0)bot.dodgeTimer-=dt;
   bot.blinkTimer-=dt;
   if(bot.blinkTimer<=0){bot.blinkTimer=rand(2.5,5.5);bot.blinkPhase=0.15;}
   if(bot.blinkPhase>0){
@@ -2133,12 +2137,35 @@ function updateBot(bot,dt){
     const ts=p.turnSpeed;
     bot.yaw+=clamp(diff,-ts*dt,ts*dt);
     aiming=Math.abs(diff)<0.28;
-    if(dist>desiredRange+3){moveX=dx/dist;moveZ=dz/dist;}
-    else if(dist<desiredRange-3){moveX=-dx/dist;moveZ=-dz/dist;}
+    if(dist>desiredRange+3){
+      moveX=dx/dist;moveZ=dz/dist;
+      /* juke while closing distance so bots don't run straight into the crosshair */
+      const juke=Math.sin(performance.now()*0.004+bot.id)*(p.aggressive?0.35:0.18);
+      const perpX=-dz/dist,perpZ=dx/dist;
+      moveX+=perpX*juke;moveZ+=perpZ*juke;
+      const mlen=Math.hypot(moveX,moveZ)||1;moveX/=mlen;moveZ/=mlen;
+    }
+    else if(dist<desiredRange-3){
+      moveX=-dx/dist;moveZ=-dz/dist;
+      if(bot.retreating){
+        /* don't just backpedal in a straight line — drift laterally too */
+        const perpX=-dz/dist,perpZ=dx/dist;
+        const bias=Math.sin(performance.now()*0.003+bot.id*1.7)*0.5;
+        moveX+=perpX*bias;moveZ+=perpZ*bias;
+        const mlen=Math.hypot(moveX,moveZ)||1;moveX/=mlen;moveZ/=mlen;
+      }
+    }
     else{
       bot.strafeTimer-=dt;
       if(bot.strafeTimer<=0){bot.strafeTimer=rand(0.7,1.8);bot.strafeDir*=-1;}
       moveX=-dz/dist*bot.strafeDir;moveZ=dx/dist*bot.strafeDir;
+    }
+    if(bot.dodgeTimer>0){
+      /* reactive dodge burst from just getting shot — blends into whatever they're already doing */
+      const perpX=Math.cos(bot.yaw),perpZ=-Math.sin(bot.yaw);
+      const k=0.85*Math.min(1,bot.dodgeTimer/0.5);
+      moveX+=perpX*bot.strafeDir*k;moveZ+=perpZ*bot.strafeDir*k;
+      const mlen=Math.hypot(moveX,moveZ)||1;moveX/=mlen;moveZ/=mlen;
     }
     const eyeY=bot.pos.y+1.5,tEyeY=t.pos.y+1.15;
     const los=hasLOS(bot.pos.x,eyeY,bot.pos.z,t.pos.x,tEyeY,t.pos.z);
@@ -2155,7 +2182,12 @@ function updateBot(bot,dt){
       const missY=rand(-aimError,aimError);
       const missZ=rand(-aimError,aimError);
       const muzzle=new THREE.Vector3(bot.pos.x,eyeY,bot.pos.z);
-      const aimPt=new THREE.Vector3(t.pos.x+missX,tEyeY+missY,t.pos.z+missZ);
+      /* lead moving targets — snipers/soldiers track better than rushers/scouts */
+      const leadSkill=p.preferred>20?0.85:p.preferred<8?0.25:0.55;
+      const leadTime=clamp(dist/38,0,0.4)*leadSkill;
+      const leadX=t.vel?t.vel.x*leadTime:0;
+      const leadZ=t.vel?t.vel.z*leadTime:0;
+      const aimPt=new THREE.Vector3(t.pos.x+leadX+missX,tEyeY+missY,t.pos.z+leadZ+missZ);
       const tc=bot.team==='blue'?0x66c2ff:0xff96a8;
       spawnTracer(muzzle,aimPt,tc);
       const distFactor=dist/w.range;
