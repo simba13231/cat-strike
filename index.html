@@ -1099,6 +1099,11 @@ const matGunBody=new THREE.MeshLambertMaterial({color:0x5a6068});
 const matWood=new THREE.MeshLambertMaterial({color:0x8a5a3a});
 const matAccent=new THREE.MeshBasicMaterial({color:0xffd93d});
 const matScope=new THREE.MeshBasicMaterial({color:0x1a1e26});
+/* these weapon-part materials are shared across every buildWeapon() call
+   (view models, world drops, everyone's held gun) — never dispose them.
+   Only the geometries buildWeapon() creates are per-call and safe to free. */
+for(const sharedMat of [matMetal,matGunBody,matWood,matAccent,matScope,outlineLineMat])
+  sharedMat.userData.shared=true;
 function buildWeapon(type){
   const g=new THREE.Group();
   const add=(geo,mat,x,y,z,rx,ry,rz)=>{
@@ -1200,6 +1205,15 @@ const NAMES=['Mochi','Biscuit','Pixel','Bandit','Sushi','Noodle','Gizmo','Pepper
 const pickups=[];
 const PICKUP_LIFE=10;
 const PICKUP_RING_GEO=new THREE.TorusGeometry(0.6,0.07,8,20);
+function disposePickupVisuals(p){
+  /* free the per-instance geometries/materials buildWeapon() and the ring create.
+     Shared weapon-part materials (tagged .userData.shared) and shared geometries
+     (PICKUP_RING_GEO) are left alone since they're reused everywhere else. */
+  p.group.traverse(obj=>{
+    if(obj.geometry&&obj.geometry!==PICKUP_RING_GEO)obj.geometry.dispose();
+    if(obj.material&&!obj.material.userData.shared)obj.material.dispose();
+  });
+}
 function spawnPickup(weapon,pos){
   if(!WEAPONS[weapon])return;
   const g=new THREE.Group();
@@ -1218,6 +1232,7 @@ function updatePickups(dt,now){
     const age=(now-p.bornAt)/1000;
     if(age>PICKUP_LIFE){
       scene.remove(p.group);
+      disposePickupVisuals(p);
       pickups.splice(i,1);
       continue;
     }
@@ -1243,6 +1258,7 @@ function updatePickups(dt,now){
           sfxPickup();
           announce('PICKED UP '+WEAPONS[p.weapon].name);
           scene.remove(p.group);
+          disposePickupVisuals(p);
           pickups.splice(i,1);
         }
       }
@@ -1250,7 +1266,7 @@ function updatePickups(dt,now){
   }
 }
 function clearPickups(){
-  for(const p of pickups)scene.remove(p.group);
+  for(const p of pickups){scene.remove(p.group);disposePickupVisuals(p);}
   pickups.length=0;
 }
 
