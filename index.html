@@ -562,10 +562,9 @@ function addDirtPath(px,pz,w,h,rot){
   if(rot)m.rotation.z=rot;
   m.position.set(px,0.012,pz);world.add(m);
 }
-addDirtPath(0,38,7,24,0);addDirtPath(0,-38,7,24,0);
-addDirtPath(38,0,24,7,0);addDirtPath(-38,0,24,7,0);
-addDirtPath(-30,-30,5,18,Math.PI/4);addDirtPath(30,-30,5,18,-Math.PI/4);
-addDirtPath(-30,30,5,18,-Math.PI/4);addDirtPath(30,30,5,18,Math.PI/4);
+addDirtPath(-30,20,6,20,0);addDirtPath(-30,-20,6,20,0);
+addDirtPath(0,20,6,20,0);addDirtPath(0,-20,6,20,0);
+addDirtPath(30,20,6,20,0);addDirtPath(30,-20,6,20,0);
 
 const WALL=0xd4c4a8,PLAT=0xe8d8a8,PLAT2=0xd8c890,CRATE=0xe08a48,
       BUILD_A=0xf5b8a0,BUILD_B=0xa8d8f0,BUILD_C=0xf0e0a0,BUILD_D=0xb8e0b8,STONE=0xc8bea8;
@@ -583,12 +582,31 @@ for(let i=-60;i<=60;i+=10){
   addBox(-65.5,2,i,0.8,4,1.8,STONE);
   addBox(65.5,2,i,0.8,4,1.8,STONE);
 }
-addBox(0,0.5,0,20,1,20,PLAT);
-addBox(0,1.25,0,12,0.5,12,PLAT2);
-addBox(0,1.05,-10,20,0.15,0.4,STONE);addBox(0,1.05,10,20,0.15,0.4,STONE);
-addBox(-10,1.05,0,0.4,0.15,20,STONE);addBox(10,1.05,0,0.4,0.15,20,STONE);
-addBox(0,1.55,-6,12,0.1,0.3,STONE);addBox(0,1.55,6,12,0.1,0.3,STONE);
-addBox(-6,1.55,0,0.3,0.1,12,STONE);addBox(6,1.55,0,0.3,0.1,12,STONE);
+/* ---------- RIVER + BRIDGES (new centerpiece, splits the two team halves) ---------- */
+const riverMat=new THREE.MeshLambertMaterial({color:0x3f8fb0,transparent:true,opacity:0.92});
+const river=new THREE.Mesh(new THREE.PlaneGeometry(132,15),riverMat);
+river.rotation.x=-Math.PI/2;river.position.y=0.016;world.add(river);
+const bankMat=new THREE.MeshLambertMaterial({color:0xc8a878});
+[-7.6,7.6].forEach(z=>{
+  const b=new THREE.Mesh(new THREE.PlaneGeometry(132,1.4),bankMat);
+  b.rotation.x=-Math.PI/2;b.position.set(0,0.014,z);world.add(b);
+});
+const PLANK=0x9a7248;
+function addBridge(px){
+  addBox(px,0.28,0,6,0.4,17,PLANK);
+  for(let i=-1;i<=1;i+=2){
+    const rail=new THREE.Mesh(new THREE.BoxGeometry(0.15,0.6,17),
+      new THREE.MeshLambertMaterial({color:0x6a4e30}));
+    rail.position.set(px+i*3,0.75,0);world.add(rail);
+    const e=new THREE.LineSegments(new THREE.EdgesGeometry(rail.geometry),outlineLineMat);
+    e.position.copy(rail.position);world.add(e);
+  }
+}
+addBridge(-30);addBridge(0);addBridge(30);
+[-30,0,30].forEach(px=>{
+  addSandbags(px-3.4,9.5,Math.PI/2);addSandbags(px+3.4,9.5,Math.PI/2);
+  addSandbags(px-3.4,-9.5,Math.PI/2);addSandbags(px+3.4,-9.5,Math.PI/2);
+});
 [[-9.5,-9.5],[9.5,-9.5],[-9.5,9.5],[9.5,9.5]].forEach(p=>{
   addBox(p[0],1.2,p[1],0.7,1.4,0.7,STONE);
   addBox(p[0],2.0,p[1],1.0,0.2,1.0,PLAT2);
@@ -599,28 +617,6 @@ addBox(-6,1.55,0,0.3,0.1,12,STONE);addBox(6,1.55,0,0.3,0.1,12,STONE);
     new THREE.MeshBasicMaterial({color:0xffc840}));
   flame.position.set(p[0],3.9,p[1]);world.add(flame);
 });
-function addStairs(cx,cz,dir){
-  const stepH=0.4,stepDepth=1.2;
-  for(let i=0;i<5;i++){
-    const h=stepH*(i+1);
-    const off=i*stepDepth;
-    if(dir==='N') addBox(cx,h/2,cz-off,8,h,stepDepth,PLAT);
-    else if(dir==='S') addBox(cx,h/2,cz+off,8,h,stepDepth,PLAT);
-    else if(dir==='E') addBox(cx+off,h/2,cz,stepDepth,h,8,PLAT);
-    else if(dir==='W') addBox(cx-off,h/2,cz,stepDepth,h,8,PLAT);
-  }
-  if(dir==='N'||dir==='S'){
-    const sign=dir==='N'?-1:1;
-    addBox(cx-4.15,0.9,cz+sign*3.2,0.35,1.8,7,STONE);
-    addBox(cx+4.15,0.9,cz+sign*3.2,0.35,1.8,7,STONE);
-  }else{
-    const sign=dir==='W'?-1:1;
-    addBox(cx+sign*3.2,0.9,cz-4.15,7,1.8,0.35,STONE);
-    addBox(cx+sign*3.2,0.9,cz+4.15,7,1.8,0.35,STONE);
-  }
-}
-addStairs(0,-10.6,'N');addStairs(0,10.6,'S');
-addStairs(-10.6,0,'W');addStairs(10.6,0,'E');
 
 function addBuilding(px,pz,color){
   addBox(px,1.75,pz-3.5,9,3.5,0.6,color);
@@ -658,8 +654,8 @@ function addBuilding(px,pz,color){
     flag.position.set(px+ox+0.6,4.0,pz+3.2);world.add(flag);
   });
 }
-addBuilding(-40,-40,BUILD_A);addBuilding(40,-40,BUILD_B);
-addBuilding(-40,40,BUILD_C);addBuilding(40,40,BUILD_D);
+addBuilding(-38,20,BUILD_A);addBuilding(38,20,BUILD_B);
+addBuilding(-38,-20,BUILD_C);addBuilding(38,-20,BUILD_D);
 
 const crateData=[
   [-7,1,7],[7,1,-7],[-7,1,-7],[7,1,7],
@@ -927,13 +923,12 @@ function addJumpPad(px,pz,power){
   arrow.rotation.y=Math.PI/4;world.add(arrow);
   jumpPads.push({x:px,z:pz,r:2.6,r2:6.76,power:power||14,ring,arrow,baseArrowY:0.75,cooldown:0});
 }
-addJumpPad(-27,0,14);addJumpPad(27,0,14);
-addJumpPad(0,-27,14);addJumpPad(0,27,14);
+addJumpPad(-30,-11,14);addJumpPad(30,11,14);
+addJumpPad(-15,19,14);addJumpPad(15,-19,14);
 
-/* ---------- HIGH TOWERS ---------- */
+/* ---------- HIGH TOWERS (2 overwatch towers covering the river crossing) ---------- */
 const TOWER_POSITIONS=[
-  {x:-30, z:-30},{x: 30, z:-30},
-  {x:-30, z: 30},{x: 30, z: 30}
+  {x:-15, z:15},{x: 15, z:-15}
 ];
 function addHighTower(px,pz){
   const pillar=new THREE.Mesh(
